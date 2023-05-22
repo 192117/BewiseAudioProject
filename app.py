@@ -63,7 +63,7 @@ async def add_audio(request: Request, user_id: int, user_uuid_token: str, audio_
         audio_mp3 = await handle_file_upload(audio_file)
         audio, user = save_audio(user_id, user_uuid_token, audio_mp3, db)
         url = request.url_for('record')
-        url_response = urljoin(str(url), f'?audio_id={audio.id}&user_id={user.id}')
+        url_response = urljoin(str(url), f'?id={audio.id}&user={user.id}')
         return JSONResponse(content=url_response, status_code=201)
     except IntegrityError as exception:
         raise HTTPException(status_code=400, detail=str(exception.args[0]))
@@ -75,6 +75,6 @@ async def record(id: int, user: int, db: Session = Depends(connect_db)):
     if not audio:
         raise HTTPException(status_code=404, detail='Audio not found')
     response = Response(content=audio.audio_file)
-    response.headers['Content-Disposition'] = f'attachment; filename={audio.audio_uuid_identifier}'
+    response.headers['Content-Disposition'] = f'attachment; filename={audio.audio_uuid_identifier}.mp3'
     response.headers['Content-Type'] = 'audio/mp3'
     return response
